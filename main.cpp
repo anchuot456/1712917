@@ -20,20 +20,48 @@ int demsosv(FILE*p){
 			n++;
 		}
 	}
-	n--;
-	return n;
+	return n-2;
 }
 void docthongtin(FILE*p, sinhvien*&sv,int n){
 	sv = new sinhvien[n];
-	fseek(p, 0L, SEEK_SET);
+	fseek(p, 124L, SEEK_SET);
 	for (int i = 0; i < n; i++){
-		fwscanf(p, L"%[^,],%[^,],%[^,],%d,%[^,],%[^,],%[^,],%[^,],%[^,],%[^\n]\n", &sv[i].mssv, &sv[i].hoten, &sv[i].khoa, &sv[i].khoahoc, &sv[i].email, &sv[i].ngaysinh, &sv[i].hinh, &sv[i].monan, &sv[i].amnhac, &sv[i].mota);
+		fwscanf(p, L"%[^,],%[^,],%[^,],%d,%[^,],%[^,],%[^,],", &sv[i].mssv, &sv[i].hoten, &sv[i].khoa, &sv[i].khoahoc, &sv[i].email, &sv[i].ngaysinh, &sv[i].hinh);
+		wchar_t ch = fgetwc(p);
+		if (ch == L'\"'){
+			fwscanf(p, L"%[^\"]\",", &sv[i].monan);
+		}
+		else{
+			fseek(p, -1L, SEEK_CUR);
+			fwscanf(p, L"%[^,],", &sv[i].monan);
+			sv[i].monan[0] = ch;
+		}
+		ch = fgetwc(p);
+		if (ch == L'\"'){
+			fwscanf(p, L"%[^\"]\",", &sv[i].amnhac);
+		}
+		else{
+			fseek(p, -1L, SEEK_CUR);
+			fwscanf(p, L"%[^,],", &sv[i].amnhac);
+			sv[i].amnhac[0] = ch;
+		}
+		ch = fgetwc(p);
+		if (ch == L'\"'){
+			fwscanf(p, L"%[^\"]\",", &sv[i].mota);
+		}
+		else{
+			fseek(p, -1L, SEEK_CUR);
+			fwscanf(p, L"%[^\n]\n", &sv[i].mota);
+			sv[i].mota[0] = ch;
+		}
 	}
 }
 void VietWeb(FILE*webmau, FILE**&web, sinhvien*sv, int n){
 	web = new FILE*[n];
 	for (int number = 0; number < n; number++){
-		_wfopen_s(&web[number], L"web.html", L"wt,ccs=UTF-8");
+		wchar_t *tenweb=new wchar_t[20];
+		 tenweb = nhapchuoi(sv[number].mssv, L".html");
+		_wfopen_s(&web[number], tenweb, L"wt,ccs=UTF-8");
 		if (web[number] != NULL){
 			wchar_t* dauhieu[13];
 			dauhieu[0] = L"<title>";                    //điểm nhận biết số title
@@ -101,6 +129,7 @@ void VietWeb(FILE*webmau, FILE**&web, sinhvien*sv, int n){
 			fclose(web[number]);
 		}
 		delete[]web;
+		delete[]tenweb;
 	}
 }
 void main(){
@@ -108,7 +137,7 @@ void main(){
 	sinhvien *sv=NULL;
 	int n;
 	_wfopen_s(&filein, L"thongtinsinhvien.csv", L"rt,ccs=UTF-8");
-	_wfopen_s(&webmau, L"webthu.htm", L"rt,ccs=UTF-8");
+	_wfopen_s(&webmau, L"webmau.htm", L"rt,ccs=UTF-8");
 	if (filein != NULL){
 		if (webmau != NULL){
 			
