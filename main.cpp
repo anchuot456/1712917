@@ -47,7 +47,7 @@ void docthongtin(FILE*p, sinhvien*&sv,int n){
 		}
 		ch = fgetwc(p);
 		if (ch == L'\"'){
-			fwscanf(p, L"%[^\"]\",", &sv[i].mota);
+			fwscanf(p, L"%[^\"]\"\n", &sv[i].mota);
 		}
 		else{
 			fseek(p, -1L, SEEK_CUR);
@@ -60,7 +60,7 @@ void VietWeb(FILE*webmau, FILE**&web, sinhvien*sv, int n){
 	web = new FILE*[n];
 	for (int number = 0; number < n; number++){
 		wchar_t *tenweb=new wchar_t[20];
-		 tenweb = nhapchuoi(sv[number].mssv, L".html");
+		 tenweb =nhapchuoi( L"websinhvien\\",nhapchuoi(sv[number].mssv, L".html"));
 		_wfopen_s(&web[number], tenweb, L"wt,ccs=UTF-8");
 		if (web[number] != NULL){
 			wchar_t* dauhieu[13];
@@ -124,13 +124,11 @@ void VietWeb(FILE*webmau, FILE**&web, sinhvien*sv, int n){
 			wprintf(L"%s", webin);
 			delete[]webnhap;
 			delete[]webin;
-			/*wchar_t*new_name = nhapchuoi(sv[number].mssv, L".html");
-			_wrename(L"web.html", new_name);*/
 			fclose(web[number]);
 		}
-		delete[]web;
 		delete[]tenweb;
 	}
+	delete[]web;
 }
 void main(){
 	FILE*filein,*webmau, **fileout;
