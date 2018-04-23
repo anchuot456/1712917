@@ -12,33 +12,28 @@ long strlen(wchar_t str[]){
 	}
 	return strlen;                        // k tính kí tự \0
 }
-int ViTriChenThongTin(FILE*webmau, wchar_t dauhieu[]){
-	fseek(webmau, 0, SEEK_END);
-	long max = ftell(webmau);
-	wchar_t* str = new wchar_t[max];
-	fseek(webmau, 0L, SEEK_SET);
-	int i = 0;
-	while (!feof(webmau)){
-		fwscanf(webmau, L"%c", &str[i]);
-		i++;
-	}
-	for (int i = 0; i < strlen(str); i++){
-		int k = 1;
-		for (int j = 0; j<strlen(dauhieu); j++){
-			int str_j = i - strlen(dauhieu) + j;
-			if (dauhieu[j] != str[str_j]){
-				k = 0;
-				break;
+int ViTriChenThongTin(wchar_t*webmau, wchar_t dauhieu[]){
+		for (int i = 0; i < strlen(webmau); i++){
+			int k = 1;
+			for (int j = 0; j < strlen(dauhieu); j++){
+				int str_j = i - strlen(dauhieu) + j;
+				if (dauhieu[j] != webmau[str_j]){
+					k = 0;
+					break;
+				}
+			}
+			if (k == 1){
+				return i;
 			}
 		}
-		if (k == 1){
-			fseek(webmau, 0L, SEEK_SET);
-			delete[]str;
-			return i;      
-		}
 	}
-}
 wchar_t* nhapchuoi(wchar_t* str1, wchar_t* str2){
+	if (str1 == NULL){
+		return str2;
+	}
+	if (str2 == NULL){
+		return str1;
+	}
 	wchar_t* str = new wchar_t[strlen(str1) + strlen(str2) + 1];
 	for (int i = 0; i <= strlen(str1); i++){
 		str[i] = str1[i];
@@ -47,4 +42,16 @@ wchar_t* nhapchuoi(wchar_t* str1, wchar_t* str2){
 		str[strlen(str1) + i] = str2[i];
 	}
 	return str;
+}
+void XoaChuoi(wchar_t*webnhap, int vitri, int soluong){
+	if (vitri + soluong - 1>strlen(webnhap)) webnhap[0] = NULL;
+	else
+	{
+		while (webnhap[vitri + soluong] != NULL)
+		{
+			webnhap[vitri] = webnhap[vitri + soluong];
+			vitri++;
+		}
+		webnhap[vitri] = NULL;
+	}
 }

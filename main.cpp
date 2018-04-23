@@ -8,8 +8,8 @@
 
 
 struct sinhvien{
-	wchar_t mssv[10], hoten[30], khoa[30], ngaysinh[11], hinh[100], mota[1000], email[50],monan[30],amnhac[30];
-	int khoahoc;
+	wchar_t mssv[10], hoten[30], khoa[30], ngaysinh[11], hinh[100], mota[1000], email[50],sothich[50][50];
+	int khoahoc,n;
 };
 int demsosv(FILE*p){
 	int n = 0;
@@ -24,35 +24,40 @@ int demsosv(FILE*p){
 }
 void docthongtin(FILE*p, sinhvien*&sv,int n){
 	sv = new sinhvien[n];
-	fseek(p, 124L, SEEK_SET);
+	fseek(p, 92L, SEEK_SET);
 	for (int i = 0; i < n; i++){
 		fwscanf(p, L"%[^,],%[^,],%[^,],%d,%[^,],%[^,],%[^,],", &sv[i].mssv, &sv[i].hoten, &sv[i].khoa, &sv[i].khoahoc, &sv[i].email, &sv[i].ngaysinh, &sv[i].hinh);
-		wchar_t ch = fgetwc(p);
-		if (ch == L'\"'){
-			fwscanf(p, L"%[^\"]\",", &sv[i].monan);
-		}
-		else{
-			fseek(p, -1L, SEEK_CUR);
-			fwscanf(p, L"%[^,],", &sv[i].monan);
-			sv[i].monan[0] = ch;
-		}
+		wchar_t ch ;
 		ch = fgetwc(p);
 		if (ch == L'\"'){
-			fwscanf(p, L"%[^\"]\",", &sv[i].amnhac);
+			fwscanf(p, L"%[^\"]\",", &sv[i].mota);
 		}
 		else{
 			fseek(p, -1L, SEEK_CUR);
-			fwscanf(p, L"%[^,],", &sv[i].amnhac);
-			sv[i].amnhac[0] = ch;
-		}
-		ch = fgetwc(p);
-		if (ch == L'\"'){
-			fwscanf(p, L"%[^\"]\"\n", &sv[i].mota);
-		}
-		else{
-			fseek(p, -1L, SEEK_CUR);
-			fwscanf(p, L"%[^\n]\n", &sv[i].mota);
+			fwscanf(p, L"%[^,],", &sv[i].mota);
 			sv[i].mota[0] = ch;
+		}
+		ch = fgetwc(p);
+		wchar_t str[100];
+		if (ch == L'\"'){                                // đọc vào chuỗi str r cắt ra
+			fwscanf(p, L"%[^\"]\"\n", &str);
+		}
+		else{
+			fseek(p, -1L, SEEK_CUR);
+			fwscanf(p, L"%[^\n]\n", &str);
+			str[0] = ch;
+		}
+		sv[i].n = 0;
+		int j = 0;
+		for (int k = 0; k < strlen(str); k++){
+			if (str[k] == L'.'){
+				j = 0;
+				sv[i].n++;
+				k++;
+			}
+			sv[i].sothich[sv[i].n][j] = str[k];
+			sv[i].sothich[sv[i].n][j + 1] = L'\0';
+			j++;
 		}
 	}
 }
@@ -74,9 +79,9 @@ void VietWeb(FILE*webmau, FILE**&web, sinhvien*sv, int n){
 			dauhieu[7] = L"<li>Sinh viên khoa ";    //điểm nhận biết ghi khoa
 			dauhieu[8] = L"<li>Ngày sinh: ";        //điểm nhận biết ghi ngày sinh
 			dauhieu[9] = L"<li>Email: ";            //điểm nhận biết ghi email
-			dauhieu[10] = L"<li>Âm nhạc: ";         //điểm nhận biết ghi âm nhạc
-			dauhieu[11] = L"<li>Ẩm thực: ";         //điểm nhận biết ghi món ăn
-			dauhieu[12] = L"\"Description\">";      //điểm nhận biết ghi mô tả
+			dauhieu[10] = L"Sở thích</div>\n                        <div>\n                            <ul class=\"TextInList\">\n";         //điểm nhận biết ghi sở thích
+			dauhieu[11] = L"\"Description\">";         //điểm nhận biết ghi mô tả
+			dauhieu[12] = L"TH2012/03</br>\n";
 			wchar_t* str[13];
 			str[0] = nhapchuoi(L"HCMUS - ", sv[number].hoten);
 			str[1] = nhapchuoi(nhapchuoi(sv[number].hoten, L" - "), sv[number].mssv);
@@ -88,14 +93,26 @@ void VietWeb(FILE*webmau, FILE**&web, sinhvien*sv, int n){
 			str[7] = sv[number].khoa;
 			str[8] = sv[number].ngaysinh;
 			str[9] = sv[number].email;
-			str[10] = sv[number].amnhac;
-			str[11] = sv[number].monan;
-			str[12] = sv[number].mota;
-			int vt[13];
-			for (int j = 0; j < 13; j++){
-				vt[j] = ViTriChenThongTin(webmau, dauhieu[j]);
+			str[10] = NULL;
+			for (int i = 0; i <= sv[number].n; i++){
+				str[10] = nhapchuoi(str[10], nhapchuoi(nhapchuoi(L"<li>", sv[number].sothich[i]), L"</li>\n"));
 			}
-			fseek(webmau, 0L, SEEK_END);
+			str[11] = sv[number].mota;
+			str[12] = L"1712917 - Bùi Anh Vũ";
+			wchar_t* xoa[13];
+			xoa[0] = L"HCMUS - Nguyễn Văn A";
+			xoa[1] = L"NGUYỄN VĂN A - 1212123";
+			xoa[2] = L"KHOA CÔNG NGHỆ THÔNG TIN";
+			xoa[3] = L"nva@gmail.com";
+			xoa[4] = L"HinhCaNhan.jpg";
+			xoa[5] = L"Nguyễn Văn A";
+			xoa[6] = L"1212123";
+			xoa[7] = L"Công nghệ thông tin";
+			xoa[8] = L"20/01/1994";
+			xoa[9] = L" nva@gmail.com";
+			xoa[10] = L"                                <li>Âm nhạc: POP, Balad</li>\n								<li>Ẩm thực: bún riêu, bún thịt nướng</li>";
+			xoa[11] = L"                             Tôi là một người rất thân thiện.";
+			xoa[12] = L"				MSSV - Tên sinh viên thực hiện";
 			wchar_t*webnhap = new wchar_t[10000];//viết vào chuỗi web nháp 
 			wchar_t*webin = new wchar_t[10000];//sao chép chuỗi web nháp r chỉnh sủa chuổi đó và in ra
 			fseek(webmau, 0L, SEEK_SET);
@@ -105,11 +122,21 @@ void VietWeb(FILE*webmau, FILE**&web, sinhvien*sv, int n){
 				webnhap[i + 1] = L'\0';
 				i++;
 			}
+			int vt[13];
+			for (int j = 0; j < 13; j++){
+				vt[j] = ViTriChenThongTin(webnhap, dauhieu[j]);
+			}
+			for (int i = 12; i >= 0; i--){
+				XoaChuoi(webnhap, vt[i], strlen(xoa[i]));
+			}
+			for (int j = 0; j < 13; j++){
+				vt[j] = ViTriChenThongTin(webnhap, dauhieu[j]);
+			}
 			int k = 0;
 			for (int i = 0; i <= strlen(webnhap); i++){
 				int t = 0;
-				for (int j = 0; j < 13;j++){
-					if (i == vt[j]){
+				for (int j = 0; j < 13;j++){                 // chèn các thong tin sinh viên vào
+				if (i == vt[j]){
 						for ( t = 0; t < strlen(str[j]); t++){
 							webin[k + t] = str[j][t];
 						}
@@ -135,7 +162,7 @@ void main(){
 	sinhvien *sv=NULL;
 	int n;
 	_wfopen_s(&filein, L"thongtinsinhvien.csv", L"rt,ccs=UTF-8");
-	_wfopen_s(&webmau, L"webmau.htm", L"rt,ccs=UTF-8");
+	_wfopen_s(&webmau, L"1212123.htm", L"rt,ccs=UTF-8");
 	if (filein != NULL){
 		if (webmau != NULL){
 			
